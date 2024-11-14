@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <!-- Metadatos básicos -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=none">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="author" content="Chami">
+    <meta name="description" content="Chat en tiempo real">
+    <link rel="icon" href="https://um2411.renderforest.com/u25148551/visuals/7c0e8ce1-8e0f-4e2d-a585-b1fda1763022.png" type="image/png">
+    <title>Chax</title>
+
+    <!-- Estilos CSS para la apariencia del chat -->
+    <style>
+        /* Resetea márgenes, padding y box-sizing para todos los elementos */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Estilos generales del body para centrar el contenedor del chat */
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: rgba(0, 0, 0, 0);
+            /* Fondo transparente */
+        }
+
+        /* Estilos principales del contenedor del chat */
+
+        .chat-container {
+            width: 80%;
+            height: 80%;
+            max-height: 600px;
+            min-height: 600px;
+            background: rgba(255, 255, 255, 0.7);
+            /* Fondo blanco con transparencia */
+            border-radius: 10px;
+            /* Bordes redondeados */
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            /* Sombra para el contenedor */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            animation: moveBackground 10s linear infinite;
+            /* Animación de movimiento de fondo */
+            /* Degradado con patrón para el fondo */
+            background: radial-gradient(circle farthest-side at 0% 50%, rgba(0, 0, 0, 0.7) 23.5%, transparent 0) 15.8px 22.5px, radial-gradient(circle farthest-side at 0% 50%, #FF0000 24%, transparent 0) 14.3px 22.5px, linear-gradient(rgba(0, 0, 0, 0.7) 14%, transparent 0, transparent 85%, rgba(0, 0, 0, 0.7) 0) 0 0, linear-gradient(150deg, rgba(0, 0, 0, 0.7) 24%, #FF0000 0, #FF0000 26%, transparent 0, transparent 74%, #FF0000 0, #FF0000 76%, rgba(0, 0, 0, 0.7) 0) 0 0, linear-gradient(30deg, rgba(0, 0, 0, 0.7) 24%, #FF0000 0, #FF0000 26%, transparent 0, transparent 74%, #FF0000 0, #FF0000 76%, rgba(0, 0, 0, 0.7) 0) 0 0, linear-gradient(90deg, #FF0000 2%, rgba(0, 0, 0, 0.7) 0, rgba(0, 0, 0, 0.7) 98%, #FF0000 0%) 0 0 rgba(0, 0, 0, 0.7);
+            background-size: 60px 90px;
+        }
+
+        /* Animación que mueve el fondo */
+
+        @keyframes moveBackground {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 100px -100px;
+            }
+        }
+
+        /* Estilos para la cabecera del chat */
+
+        .chat-header {
+            background: #b33939;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        /* Cuerpo del chat donde se muestran los mensajes */
+
+        .chat-body {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            /* Activa el desplazamiento solo en el cuerpo */
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Pie del chat, contiene el input y botón para enviar mensajes */
+
+        .chat-footer {
+            display: flex;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        /* Estilos del campo de entrada de texto */
+
+        .chat-footer input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            margin-right: 10px;
+            outline: none;
+            font-size: 1em;
+            background: #ff7675;
+            color: #333;
+        }
+
+        /* Botón para enviar mensajes */
+
+        .chat-footer button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            background: #b33939;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 15px;
+            transition: font-size 0.2s ease, background 0.3s;
+        }
+
+        /* Hover del botón */
+
+        .chat-footer button:hover {
+            background: #ff6b6b;
+            font-size: 17px;
+        }
+
+        /* Contenedor de cada mensaje */
+
+        .message-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            max-width: 90%;
+        }
+
+        /* Estilos de la foto de perfil */
+
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+
+        /* Nombre de usuario */
+
+        .username {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #b33939;
+        }
+
+        /* Texto del mensaje */
+
+        .message-text {
+            padding: 8px;
+            background-color: rgba(255, 99, 71, 0.8);
+            border-radius: 5px;
+            color: white;
+            flex: 1;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        /* Estilos de la barra de desplazamiento personalizada */
+
+        *::-webkit-scrollbar {
+            height: 5px;
+            width: 5px;
+        }
+
+        *::-webkit-scrollbar-track {
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+
+        *::-webkit-scrollbar-thumb {
+            border-radius: 5px;
+            background-color: rgba(255, 0, 0, 0.7);
+        }
+
+        /* Estilos del pop-up */
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            border-radius: 8px;
+            font-size: 18px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        /* Animaciones */
+
+        .popup.show {
+            display: block;
+            opacity: 1;
+            animation: fadeOut 5s forwards;
+        }
+
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+            }
+            99% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .popup a {
+            color: gray;
+            text-decoration: underline;
+        }
+
+        .popup a:hover {
+            color: lightgray;
+            text-decoration: none;
+        }
+
+        .info {
+            color: gray;
+            font-size: 15px;
+        }
+
+        /* Estilo del texto de copyright */
+
+        .copyright {
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            color: #666;
+            text-align: center;
+            padding: 5px;
+            background-color: #f9f9f9;
+            border-top: 1px solid #ddd;
+            position: absolute;
+            z-index: 2;
+            bottom: 0px;
+        }
+
+        .copyright a {
+            color: gray;
+            text-decoration: underline;
+        }
+
+        .copyright a:hover {
+            color: red;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Contenedor principal del chat -->
+    <div class="chat-container">
+        <!-- Cabecera del chat -->
+        <div class="chat-header">
+            Chax
+        </div>
+
+        <!-- Cuerpo del chat donde se muestran los mensajes -->
+        <div class="chat-body" id="chat-body">
+        </div>
+
+        <!-- Pie de página con el input y botón para enviar mensajes -->
+        <div class="chat-footer">
+            <input type="text" id="messageInput" placeholder="Escribe un mensaje..." />
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+
+    <!-- Script JavaScript para el funcionamiento del chat -->
+    <script>
+        // Función para enviar un mensaje
+        function sendMessage() {
+            const messageInput = document.getElementById("messageInput");
+            const message = messageInput.value.trim();
+
+            if (message) {
+                const messageContainer = document.createElement("div");
+                messageContainer.classList.add("message-container");
+
+                // Imagen de perfil
+                const profilePic = document.createElement("img");
+                profilePic.src = "https://um2411.renderforest.com/u25148551/visuals/9e30ac51-9522-440a-ab6c-f33d7a60bc65.png";
+                profilePic.alt = "Perfil";
+                profilePic.classList.add("profile-pic");
+
+                // Nombre de usuario
+                const username = document.createElement("div");
+                username.classList.add("username");
+                username.textContent = "Chami";
+
+                // Texto del mensaje
+                const messageText = document.createElement("div");
+                messageText.textContent = message;
+                messageText.classList.add("message-text");
+
+                // Agrega los elementos al contenedor de mensaje
+                messageContainer.appendChild(profilePic);
+                messageContainer.appendChild(username);
+                messageContainer.appendChild(messageText);
+
+                // Agrega el mensaje al chat
+                document.getElementById("chat-body").appendChild(messageContainer);
+
+                // Limpia el input de texto
+                messageInput.value = "";
+            }
+        }
+    </script>
+
+    <!-- Pop-up HTML -->
+    <div id="popup" class="popup">Esto es una versión alpha del Chat. <br>La versión oficial se publicará el 10 de diciembre de 2024<br>
+        <footer class="info">Más información en el <a href="https://chamidev.github.io/CHAX/Registro" target="_blank">Registro</a></footer>
+    </div>
+
+    <script>
+        // Mostrar el pop-up y eliminarlo del DOM después de la duración especificada
+        window.onload = function() {
+            const popup = document.getElementById("popup");
+            popup.classList.add("show");
+
+            // Ocultar el pop-up y eliminarlo del DOM después de 3s de duración
+            setTimeout(() => {
+                popup.classList.remove("show");
+                setTimeout(() => {
+                    popup.remove(); // Elimina el elemento del DOM
+                }, 5000); // Espera el tiempo del fade out
+            }, 30000);
+        };
+    </script>
+    <!-- Texto de copyright -->
+    <footer class="copyright">
+        &copy; 2022 - 2026 Creaciones de <a href="https://chamidev.github.io/HOME/">Chami</a>. Todos los derechos reservados.<br> Esta obra está protegida por derechos de autor. Queda prohibida su reproducción total o parcial sin el consentimiento expreso
+        en los <a href="https://chamidev.github.io/PERMISOS/">Permisos</a>.
+    </footer>
+</body>
+
+</html>
