@@ -89,10 +89,34 @@
             width: 48%; /* Cada botón ocupa la mitad del contenedor */
         }
 
+        .back {
+            position: absolute;
+            top: 0px;
+            left: -100%;
+            background-color: gray;
+            border-top-right-radius: 100px;
+            border-bottom-right-radius: 100px;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            animation: slideIn 1s forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                left: -100%;
+            }
+            to {
+                left: 0;
+            }
+        }
     </style>
 </head>
 <body>
-
+    <a href="https://chamidev.github.io/" class="back">
+        <script src="https://cdn.lordicon.com/lordicon.js"></script>
+        <lord-icon src="https://cdn.lordicon.com/tfwhvbiq.json" trigger="in" delay="100" state="in-reveal" colors="primary:#e4e4e4,secondary:#121331" style="width:50px;height:50px">
+        </lord-icon>
+    </a>
     <div class="container">
         <h1>¿Quieres descargar Chax Minimalista?</h1>
         <p>Elige la versión de la app para tu dispositivo.</p>
