@@ -1,175 +1,113 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="author" content="Chami">
-    <meta name="description" content="Chat en tiempo real">
-    <link rel="icon" href="https://um2411.renderforest.com/u25148551/visuals/7c0e8ce1-8e0f-4e2d-a585-b1fda1763022.png" type="image/png">
-    <title>Chax</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Descargar Chax Minimalista</title>
     <style>
-        body,
-        html {
+        body {
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-            height: 100%;
-        }
-
-        #chatWindow {
-            width: 99%;
-            height: 99%;
-            position: fixed;
-            top: 1px;
-            right: 1px;
-            background-color: rgba(0, 0, 0, 0.7);
-            border-radius: 10px;
             display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #111;
+            color: #ccc;
+            text-align: center;
+            user-select: none; /* Evita la selección de texto */
         }
 
-        #chatMessages {
-            flex: 1;
-            color: white;
-            padding: 10px;
-            overflow-y: auto;
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
             border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+            width: 80%;
+            max-width: 450px;
         }
 
-        #messageInput {
-            padding: 10px;
-            border: none;
-            background-color: black;
-            color: white;
-            border-radius: 10px;
+        h1 {
+            font-size: 2rem;
+            color: #ccc;
+            margin-bottom: 20px;
         }
 
-        #closeButton {
-            background-color: rgba(255, 0, 0, 0.3);
+        p {
+            font-size: 1.1rem;
+            color: #bbb;
+            margin-bottom: 30px;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #444;
             color: white;
+            font-size: 1.2rem;
+            padding: 15px 30px;
+            margin: 10px;
             border: none;
-            font-size: 10px;
+            border-radius: 30px;
             cursor: pointer;
-            border-radius: 10px;
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            height: 17px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
         }
+
+        .button:hover {
+            background-color: #555;
+        }
+
+        .button:focus {
+            outline: none;
+        }
+
+        .info-text {
+            font-size: 0.9rem;
+            color: #999;
+            margin-top: 20px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .button-container .button:first-child {
+            border-right: 1px solid #333; /* Línea divisoria entre los botones */
+        }
+
+        .split-button {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .split-button .button {
+            width: 48%; /* Cada botón ocupa la mitad del contenedor */
+        }
+
     </style>
 </head>
-
 <body>
-    <div id="chatWindow">
-        <div id="chatHeader">
-            <button id="closeButton">×</button>
+
+    <div class="container">
+        <h1>¿Quieres descargar Chax Minimalista?</h1>
+        <p>Elige la versión de la app para tu dispositivo.</p>
+        
+        <div class="split-button">
+            <a href="https://drive.google.com/uc?id=1C5oFRUNa_bOIZN4R6ggfL6_okFnCnkqm&export=download" class="button">PC 32 bits</a>
+            <a href="https://drive.google.com/uc?id=1inL9pYEbprQPg5WLazDQWFeWNY51okwB&export=download" class="button">PC 64 bits</a>
         </div>
-        <div id="chatMessages"></div>
-        <input type="text" id="messageInput" placeholder="Escribe un mensaje..." disabled>
+
+        <a href="https://drive.google.com/uc?id=1P17McbfVaqOkMi7_T_95Idwcd3CWV8E_&export=download" class="button">Android</a>
+        
+        <div class="info-text">
+            <p>Chax Minimalista es la app perfecta para chatear de forma rápida, sencilla y sin distracciones.</p>
+        </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-    <!-- Audio de notificación -->
-    <audio id="notificationSound" src="https://chamidev.github.io/CHAX/pick.wav"></audio>
-
-    <script>
-        // Configuración de Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyDboEIFhjFvjiZJ95b90Dq0PolcVxkWtq4",
-            authDomain: "c-unlimited.firebaseapp.com",
-            databaseURL: "https://c-unlimited-default-rtdb.firebaseio.com",
-            projectId: "c-unlimited",
-            storageBucket: "c-unlimited.firebasestorage.app",
-            messagingSenderId: "631949512076",
-            appId: "1:631949512076:web:4f66c5cdd626874bf1daa9"
-        };
-
-        // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        let username;
-
-        // Pedir nombre de usuario y contraseña
-        async function authenticateUser() {
-            username = prompt("Ingrese su nombre de usuario:");
-            const password = prompt("Ingrese su contraseña:");
-            const usersRef = db.ref('usuarios');
-
-            usersRef.once('value', (snapshot) => {
-                const users = snapshot.val();
-                if (users[username] && users[username] === password) {
-                    alert("Bienvenido " + username);
-                    enableChat();
-                } else {
-                    alert("Usuario o contraseña incorrectos. Verifique sus datos.");
-                    authenticateUser();
-                }
-            });
-        }
-
-        // Habilitar el chat
-        function enableChat() {
-            const chatMessages = document.getElementById("chatMessages");
-            const messageInput = document.getElementById("messageInput");
-            const notificationSound = document.getElementById("notificationSound");
-            messageInput.disabled = false;
-
-            // Escuchar mensajes nuevos
-            const messagesRef = db.ref('mensajes');
-            messagesRef.on('child_added', (snapshot) => {
-                const messageData = snapshot.val();
-                const messageElement = document.createElement("div");
-                messageElement.innerHTML = `<strong style="color: orange;">${messageData.usuario}:</strong> ${messageData.mensaje}`;
-                chatMessages.appendChild(messageElement);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-
-                // Reproducir sonido al recibir un mensaje nuevo
-                notificationSound.play();
-            });
-
-            // Enviar mensaje
-            messageInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    const message = messageInput.value.trim();
-                    if (message) {
-                        const newMessageRef = messagesRef.push();
-                        const now = new Date();
-                        newMessageRef.set({
-                            usuario: username,
-                            mensaje: message,
-                            fecha: {
-                                año: now.getFullYear(),
-                                mes: now.getMonth() + 1,
-                                día: now.getDate(),
-                                hora: now.getHours(),
-                                minuto: now.getMinutes(),
-                                segundo: now.getSeconds(),
-                                milisegundo: now.getMilliseconds()
-                            }
-                        });
-                        messageInput.value = '';
-
-                        // Reproducir sonido al enviar un mensaje
-                        notificationSound.play();
-                    }
-                }
-            });
-        }
-
-        // Cerrar la ventana
-        document.getElementById("closeButton").addEventListener("click", () => {
-            window.close();
-        });
-
-        // Iniciar autenticación
-        authenticateUser();
-    </script>
 </body>
-
 </html>
