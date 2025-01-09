@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="author" content="Chami">
+    <meta name="description" content="Chat en tiempo real">
+    <link rel="icon" href="https://um2411.renderforest.com/u25148551/visuals/7c0e8ce1-8e0f-4e2d-a585-b1fda1763022.png" type="image/png">
+    <title>Chax</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            user-select: none;
+        }
+
+        #chatWindow {
+            width: 99%;
+            height: 99%;
+            position: fixed;
+            top: 1px;
+            right: 1px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        #chatMessages {
+            font-size: 18px;
+            flex: 1;
+            color: white;
+            padding: 10px;
+            overflow-y: auto;
+            border-radius: 10px;
+        }
+
+        #messageInput {
+            padding: 10px;
+            border: none;
+            background-color: black;
+            color: white;
+            border-radius: 10px;
+        }
+
+        #closeButton {
+            background-color: rgba(255, 0, 0, 0.3);
+            color: white;
+            border: none;
+            font-size: 10px;
+            cursor: pointer;
+            border-radius: 10px;
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            height: 17px;
+        }
+
+        #loginScreen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+        }
+
+        #loginForm {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 300px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            padding: 10px;
+            border: 1px solid #fff;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        input[type="submit"] {
+            padding: 10px;
+            background-color: gray;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            font-size: 16px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: black;
+        }
+
+        *::-webkit-scrollbar {
+            height: 5px;
+            width: 5px;
+        }
+
+        *::-webkit-scrollbar-track {
+            border-radius: 5px;
+            background-color: #000000;
+        }
+
+        *::-webkit-scrollbar-track:hover {
+            background-color: #000000;
+        }
+
+        *::-webkit-scrollbar-track:active {
+            background-color: #000000;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            border-radius: 5px;
+            background-color: #808080;
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+            background-color: #808080;
+        }
+
+        *::-webkit-scrollbar-thumb:active {
+            background-color: #808080;
+        }
+
+        .hr-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .hr-line {
+            flex-grow: 1;
+            border-top: 1px solid gray;
+        }
+
+        .hr-text {
+            margin: 0 10px;
+            font-weight: bold;
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginScreen">
+        <div id="loginForm">
+            <input type="text" id="usernameInput" placeholder="Nombre de usuario">
+            <input type="password" id="passwordInput" placeholder="Contraseña">
+            <input type="submit" value="Iniciar sesión" id="loginButton">
+        </div>
+    </div>
+    <div id="chatWindow" style="display:none;">
+        <div id="chatHeader">
+            <button id="closeButton">cerrar sesion</button>
+        </div>
+        <div id="chatMessages"></div>
+        <input type="text" id="messageInput" placeholder="Escribe un mensaje..." disabled>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <audio id="notificationSound" src="https://chamidev.github.io/CHAX/pick.wav"></audio>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
+    import { getDatabase, ref, push, set, onChildAdded, get, remove } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDboEIFhjFvjiZ95b90Dq0PolcVxkWtq4",
+        authDomain: "c-unlimited.firebaseapp.com",
+        databaseURL: "https://c-unlimited-default-rtdb.firebaseio.com",
+        projectId: "c-unlimited",
+        storageBucket: "c-unlimited.firebasestorage.app",
+        messagingSenderId: "631949512076",
+        appId: "1:631949512076:web:4f66c5cdd626874bf1daa9"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    let username;
+
+    function getBuenosAiresTime() {
+        const now = new Date();
+        const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+        const buenosAiresOffset = -3;
+        return new Date(utc + buenosAiresOffset * 3600000);
+    }
+
+    async function checkActiveSession() {
+        const storedUsername = loadSession();
+        if (storedUsername) {
+            const usersRef = ref(db, 'usuarios');
+            const snapshot = await get(usersRef);
+            const users = snapshot.val();
+            if (users[storedUsername]) {
+                username = storedUsername;
+                showChatScreen();
+                enableChat();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function saveSession(username) {
+        localStorage.setItem('username', username);
+    }
+
+    function loadSession() {
+        return localStorage.getItem('username');
+    }
+
+    function clearSession() {
+        localStorage.removeItem('username');
+    }
+
+    function showLoginScreen() {
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('chatWindow').style.display = 'none';
+    }
+
+    function showChatScreen() {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('chatWindow').style.display = 'flex';
+    }
+
+    document.getElementById('loginButton').addEventListener('click', async () => {
+        const usernameInput = document.getElementById('usernameInput').value.trim();
+        const passwordInput = document.getElementById('passwordInput').value.trim();
+        if (!usernameInput || !passwordInput) {
+            alert('Por favor, ingrese su nombre de usuario y contraseña.');
+            return;
+        }
+
+        const usersRef = ref(db, 'usuarios');
+        const snapshot = await get(usersRef);
+        const users = snapshot.val();
+        if (users[usernameInput] && users[usernameInput] === passwordInput) {
+            alert("Bienvenido " + usernameInput);
+            username = usernameInput;
+            saveSession(username);
+            showChatScreen();
+            enableChat();
+        } else {
+            alert("Usuario o contraseña incorrectos.");
+            showLoginScreen();
+        }
+    });
+
+    function enableChat() {
+        const chatMessages = document.getElementById("chatMessages");
+        const messageInput = document.getElementById("messageInput");
+        const notificationSound = document.getElementById("notificationSound");
+
+        messageInput.disabled = false;
+
+        const messagesRef = ref(db, 'mensajes');
+        onChildAdded(messagesRef, (snapshot) => {
+            const messageData = snapshot.val();
+            const messageDate = new Date(messageData.fecha.año, messageData.fecha.mes - 1, messageData.fecha.día, messageData.fecha.hora, messageData.fecha.minuto, messageData.fecha.segundo);
+            const messageElement = document.createElement("div");
+            const hours = messageDate.getHours().toString().padStart(2, '0');
+            const minutes = messageDate.getMinutes().toString().padStart(2, '0');
+            const seconds = messageDate.getSeconds().toString().padStart(2, '0');
+            const formattedTime = `[${hours}:${minutes}:${seconds}]`;
+            const timeColor = "gray";
+            let userColor = "orange";
+            if (messageData.usuario === "Chami") userColor = "cyan";
+            else if (messageData.usuario === "Clara") userColor = "pink";
+            else if (messageData.usuario === "Agus") userColor = "green";
+            messageElement.innerHTML = `<span style="color: ${timeColor};">${formattedTime}</span> <strong style="color: ${userColor};">${messageData.usuario}:</strong> <span style="color: white;">${messageData.mensaje}</span>`;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            if (notificationSound) notificationSound.play();
+        });
+
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const message = messageInput.value.trim();
+                if (message) {
+                    const newMessageRef = push(messagesRef);
+                    const now = getBuenosAiresTime();
+                    set(newMessageRef, {
+                        usuario: username,
+                        mensaje: message,
+                        fecha: {
+                            año: now.getFullYear(),
+                            mes: now.getMonth() + 1,
+                            día: now.getDate(),
+                            hora: now.getHours(),
+                            minuto: now.getMinutes(),
+                            segundo: now.getSeconds(),
+                            milisegundo: now.getMilliseconds()
+                        }
+                    });
+                    messageInput.value = '';
+                    if (notificationSound) notificationSound.play();
+                }
+            }
+        });
+    }
+
+    document.getElementById("closeButton").addEventListener("click", () => {
+        clearSession();
+        showLoginScreen();
+    });
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        const isActiveSession = await checkActiveSession();
+        if (!isActiveSession) {
+            showLoginScreen();
+        }
+    });
+
+    function handleLinks(type) {
+        const chatMessages = document.getElementById("chatMessages");
+        const observer = new MutationObserver(() => {
+            const messages = chatMessages.querySelectorAll("div");
+            messages.forEach(message => {
+                const htmlContent = message.innerHTML;
+                const pattern = type === 'image' ? /#(https?:\/\/[^\s#]+(?:\.png|\.jpg|\.jpeg|\.gif))#/ :
+                               type === 'video' ? /#(https?:\/\/[^\s#]+(?:\.mp4|\.webm|\.ogg))#/ :
+                               /#(https?:\/\/[^\s#]+(?:\.mp3|\.ogg|\.wav))#/;
+                const matches = htmlContent.match(pattern);
+                if (matches && !message.querySelector(type)) {
+                    const mediaUrl = matches[1];
+                    const mediaElement = document.createElement(type);
+                    mediaElement.src = mediaUrl;
+                    mediaElement.controls = true;
+                    mediaElement.style.maxWidth = "200px";
+                    mediaElement.style.maxHeight = "200px";
+                    mediaElement.style.marginTop = "10px";
+                    mediaElement.style.display = "block";
+                    const newHtmlContent = htmlContent.replace(pattern, "");
+                    message.innerHTML = newHtmlContent;
+                    message.appendChild(mediaElement);
+                }
+            });
+        });
+        observer.observe(chatMessages, { childList: true });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        handleLinks('image');
+        handleLinks('video');
+        handleLinks('audio');
+    });
+
+    function getYesterdayDate() {
+        const now = new Date();
+        now.setDate(now.getDate() - 1);
+        return now;
+    }
+
+    function isFromYesterday(messageDate) {
+        const yesterday = getYesterdayDate();
+        return (
+            messageDate.getFullYear() === yesterday.getFullYear() &&
+            messageDate.getMonth() === yesterday.getMonth() &&
+            messageDate.getDate() === yesterday.getDate()
+        );
+    }
+
+    function deleteOldMessages() {
+        const messagesRef = ref(db, 'mensajes');
+        onChildAdded(messagesRef, (snapshot) => {
+            const messageData = snapshot.val();
+            const messageDate = new Date(
+                messageData.fecha.año,
+                messageData.fecha.mes - 1,
+                messageData.fecha.día,
+                messageData.fecha.hora,
+                messageData.fecha.minuto,
+                messageData.fecha.segundo
+            );
+
+            if (isFromYesterday(messageDate)) {
+                remove(snapshot.ref);
+                console.log(`Mensaje del día anterior eliminado: ${messageData.mensaje}`);
+            }
+        });
+    }
+
+    setInterval(deleteOldMessages, 10000);
+</script>
+</body>
+</html>
